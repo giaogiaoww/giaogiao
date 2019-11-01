@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wyj.dao.UserDao">
+	<insert id="zhuce" parameterType="User" useGeneratedKeys="true">
+		insert into user(uname,pwd,realname,phone)
+		values(#{uname},#{pwd},#{realname},#{phone})
+	</insert>
+	
+	
+	
+	<resultMap type="user" id="loginuser">
+		<id column="uid" property="uid"/>
+		<association property="admin" column="uid" select="findadmin"></association>
+	</resultMap>
+	<select id="findadmin" parameterType="int" resultType="Admins">
+		select * from admins
+		where uid=#{uid}
+	</select>
+	<select id="login" parameterType="user" resultMap="loginuser">
+		select * from user
+		where uname=#{uname} and pwd=#{pwd}
+	</select>
+	
+	
+	
+	<select id="checkUname" parameterType="String" resultType="int">
+		select count(1) from user
+		where uname=#{uname}
+	</select>
+</mapper>

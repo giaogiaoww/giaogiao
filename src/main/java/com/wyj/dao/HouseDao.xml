@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="com.wyj.dao.HouseDao">
+	<resultMap type="house" id="loadhouse">
+		<id column="hid" property="hid"/>
+		<association property="housetype" column="typeid" select="findtype"></association>
+	</resultMap>
+	<select id="findtype" resultType="HouseType" parameterType="int">
+		select * from housetype
+		where id=#{typeid}
+	</select>
+	<select id="load" resultMap="loadhouse" parameterType="map">
+		select * from house
+		<trim prefix="where" suffixOverrides="and ||or ">
+			<if test="title!=null">
+				title like concat('%',#{title},'%') and 
+			</if>
+			<if test="qx!=null">
+				<choose>
+					<when test="jd!=null">
+						address like concat('%',#{qx},#{jd},'%') and 
+					</when>
+					<otherwise>
+						address like concat('%',#{qx},'%') and 
+					</otherwise>
+				</choose>
+			</if>
+			<if test="typeid!=null">
+				typeid=#{typeid} and
+			</if>
+			<choose>
+				<when test="price==1">
+					price &lt; 1000 and 
+				</when>
+				<when test="price==2">
+					price between 1000 and 2000 and 
+				</when>
+				<when test="price==3">
+					price &gt; 2000 and 
+				</when>
+			</choose>
+			<choose>
+				<when test="area==1">
+					area &lt; 40 and 
+				</when>
+				<when test="area==2">
+					area between 40 and 100 and 
+				</when>
+				<when test="area==3">
+					area &gt; 100 and 
+				</when>
+			</choose>
+		</trim>
+		order by price asc
+	</select>
+	
+	<select id="details" resultMap="loadhouse" parameterType="int">
+		select * from house where hid=#{hid}
+	</select>
+	
+	<insert id="fabu" parameterType="House" useGeneratedKeys="true">
+		insert into house(title,address,typeid,price,area,phone,housedate,detailed,img)
+		value(#{title},#{address},#{typeid},#{price},#{area},#{phone},#{housedate},#{detailed},#{img})
+	</insert>
+	
+	<update id="update" parameterType="house">
+		update house set title=#{title},address=#{address},typeid=#{typeid},price=#{price},area=#{area},phone=#{phone},housedate=#{housedate},detailed=#{detailed},img=#{img}
+		where hid=#{hid}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from house
+		where hid=#{hid}
+	</delete>
+</mapper>
